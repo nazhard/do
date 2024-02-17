@@ -44,6 +44,27 @@ func Stuff() (string, error) {
     }
   }
 
+  if numArgs == 3 && os.Args[1] == "." {
+    script = os.Args[2]
+
+    args = "./"+script
+    err := checkFile(args)
+    if err != nil {
+      args = "./"+script+".sh"
+    }
+
+    meh, err := check(args)
+    if err != nil {
+      fmt.Println(err)
+    }
+
+    if strings.Contains(meh, "bash") {
+      name = "bash"
+    } else if strings.Contains(meh, "fish") {
+      name = "fish"
+    }
+  }
+
   cmd := exec.Command(name, args)
   // fmt.Println(name, args)
 
