@@ -7,10 +7,10 @@ import (
 )
 
 func main() {
-  out, err := do.Stuff()
+  _, err := do.Stuff()
   if err != nil {
     fmt.Println(err)
   }
 
-  fmt.Print(out)
+  // fmt.Print(out)
 }

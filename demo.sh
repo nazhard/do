@@ -1,3 +1,4 @@
 #!/bin/bash
 
-echo "hello"
+# run command from tree package
+tree
