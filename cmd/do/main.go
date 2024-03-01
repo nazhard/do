@@ -7,10 +7,12 @@ import (
 )
 
 func main() {
-  _, err := do.Stuff()
+  cmd, err := do.Stuff()
   if err != nil {
     fmt.Println(err)
   }
 
-  // fmt.Print(out)
+  _ = cmd.Start()
+
+  defer cmd.Wait()
 }

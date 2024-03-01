@@ -3,9 +3,7 @@ package do
 import (
   "errors"
   "bufio"
-  "bytes"
   "fmt"
-  "io"
   "os"
   "os/exec"
   "strings"
@@ -17,7 +15,7 @@ var (
   name string
 )
 
-func Stuff() (string, error) {
+func Stuff() (*exec.Cmd, error) {
   numArgs := len(os.Args)
 
   if numArgs == 1 {
@@ -70,16 +68,11 @@ func Stuff() (string, error) {
   cmd := exec.Command(name, args)
   // fmt.Println(name, args)
 
-  var stdBuffer bytes.Buffer
-  mw := io.MultiWriter(os.Stdout, &stdBuffer)
-
-  cmd.Stdout = mw
-  cmd.Stderr = mw
+  cmd.Stdout = os.Stdout
+  cmd.Stderr = os.Stderr
 
   // Execute the command
-  cmd.Run()
-
-  return stdBuffer.String(), nil
+  return cmd, nil
 }
 
 func check(path string) (string, error) {
