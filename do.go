@@ -71,7 +71,6 @@ func Stuff() (*exec.Cmd, error) {
   cmd.Stdout = os.Stdout
   cmd.Stderr = os.Stderr
 
-  // Execute the command
   return cmd, nil
 }
 
