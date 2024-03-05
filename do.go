@@ -1,8 +1,8 @@
 package do
 
 import (
-  "errors"
   "bufio"
+  "errors"
   "fmt"
   "os"
   "os/exec"
@@ -13,6 +13,7 @@ var (
   script string
   args string
   name string
+  n string
 )
 
 func Stuff() (*exec.Cmd, error) {
@@ -30,6 +31,14 @@ func Stuff() (*exec.Cmd, error) {
     err := checkFile(args)
     if err != nil {
       args = "./scripts/"+script+".sh"
+      err = checkFile(args)
+      if err != nil {
+        args = "./scripts/"+script+".js"
+        err = checkFile(args)
+        if err != nil {
+          args = "./scripts/"+script+".mjs"
+        }
+      }
     }
 
     meh, err := check(args)
@@ -37,11 +46,7 @@ func Stuff() (*exec.Cmd, error) {
       fmt.Println(err)
     }
 
-    if strings.Contains(meh, "bash") {
-      name = "bash"
-    } else if strings.Contains(meh, "fish") {
-      name = "fish"
-    }
+    name = contains(meh)
   }
 
   if numArgs == 3 && os.Args[1] == "." {
@@ -51,6 +56,10 @@ func Stuff() (*exec.Cmd, error) {
     err := checkFile(args)
     if err != nil {
       args = "./"+script+".sh"
+    } else if err != nil {
+      args = "./"+script+".js"
+    } else if err != nil {
+      args = "./"+script+".mjs"
     }
 
     meh, err := check(args)
@@ -58,11 +67,7 @@ func Stuff() (*exec.Cmd, error) {
       fmt.Println(err)
     }
 
-    if strings.Contains(meh, "bash") {
-      name = "bash"
-    } else if strings.Contains(meh, "fish") {
-      name = "fish"
-    }
+    name = contains(meh)
   }
 
   cmd := exec.Command(name, args)
@@ -91,6 +96,18 @@ func check(path string) (string, error) {
   } else {
     return "", errors.New("error reading file")
   }
+}
+
+func contains(l string) string {
+  if strings.Contains(l, "bash") {
+    n = "bash"
+  } else if strings.Contains(l, "fish") {
+    n = "fish"
+  } else if strings.Contains(l, "zx") {
+    n = "zx"
+  }
+
+  return n
 }
 
 func checkFile(file string) error {
