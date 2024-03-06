@@ -28,18 +28,7 @@ func Stuff() (*exec.Cmd, error) {
     script = os.Args[1]
 
     args = "./scripts/"+script
-    err := checkFile(args)
-    if err != nil {
-      args = "./scripts/"+script+".sh"
-      err = checkFile(args)
-      if err != nil {
-        args = "./scripts/"+script+".js"
-        err = checkFile(args)
-        if err != nil {
-          args = "./scripts/"+script+".mjs"
-        }
-      }
-    }
+    scriptOK("scripts/"+script)
 
     meh, err := check(args)
     if err != nil {
@@ -53,14 +42,7 @@ func Stuff() (*exec.Cmd, error) {
     script = os.Args[2]
 
     args = "./"+script
-    err := checkFile(args)
-    if err != nil {
-      args = "./"+script+".sh"
-    } else if err != nil {
-      args = "./"+script+".js"
-    } else if err != nil {
-      args = "./"+script+".mjs"
-    }
+    scriptOK(script)
 
     meh, err := check(args)
     if err != nil {
@@ -108,6 +90,21 @@ func contains(l string) string {
   }
 
   return n
+}
+
+func scriptOK(s string) {
+  err := checkFile(args)
+  if err != nil {
+    args = "./"+s+".mjs"
+    err = checkFile(args)
+    if err != nil {
+      args = "./"+s+".js"
+      err = checkFile(args)
+      if err != nil {
+        args = "./"+s+".sh"
+      }
+    }
+  }
 }
 
 func checkFile(file string) error {
