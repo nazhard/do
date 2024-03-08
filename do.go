@@ -1,117 +1,123 @@
 package do
 
 import (
-  "bufio"
-  "errors"
-  "fmt"
-  "os"
-  "os/exec"
-  "strings"
+	"bufio"
+	"errors"
+	"fmt"
+	"os"
+	"os/exec"
+	"strings"
 )
 
 var (
-  script string
-  args string
-  name string
-  n string
+	script string
+	args   string
+	name   string
+	n      string
 )
 
 func Stuff() (*exec.Cmd, error) {
-  numArgs := len(os.Args)
+	numArgs := len(os.Args)
 
-  if numArgs == 1 {
-    fmt.Println("do v0.0.1 \n")
-    fmt.Println("automaticly run your .sh file on ./scripts/ directory.")
-  }
-  
-  if numArgs == 2 {
-    script = os.Args[1]
+	if numArgs == 1 {
+		fmt.Println("do v0.0.1 \n")
+		fmt.Println("automaticly run your .sh file on ./scripts/ directory.")
+	}
 
-    args = "./scripts/"+script
-    scriptOK("scripts/"+script)
+	if numArgs == 2 {
+		script = os.Args[1]
 
-    meh, err := check(args)
-    if err != nil {
-      fmt.Println(err)
-    }
+		args = "./scripts/" + script
+		scriptOK("scripts/" + script)
 
-    name = contains(meh)
-  }
+		meh, err := check(args)
+		if err != nil {
+			fmt.Println(err)
+		}
 
-  if numArgs == 3 && os.Args[1] == "." {
-    script = os.Args[2]
+		name = contains(meh)
+	}
 
-    args = "./"+script
-    scriptOK(script)
+	if numArgs == 3 && os.Args[1] == "." {
+		script = os.Args[2]
 
-    meh, err := check(args)
-    if err != nil {
-      fmt.Println(err)
-    }
+		args = "./" + script
+		scriptOK(script)
 
-    name = contains(meh)
-  }
+		meh, err := check(args)
+		if err != nil {
+			fmt.Println(err)
+		}
 
-  cmd := exec.Command(name, args)
-  // fmt.Println(name, args)
+		name = contains(meh)
+	}
 
-  cmd.Stdout = os.Stdout
-  cmd.Stderr = os.Stderr
+	cmd := exec.Command(name, args)
+	// fmt.Println(name, args)
 
-  return cmd, nil
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	return cmd, nil
 }
 
 func check(path string) (string, error) {
-  filePath := path
+	filePath := path
 
-  file, err := os.Open(filePath)
-  if err != nil {
-    return "", errors.New(path+" doesn't exist")
-  }
-  
-  defer file.Close()
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", errors.New(path + " doesn't exist")
+	}
 
-  scanner := bufio.NewScanner(file)
-  if scanner.Scan() {
-    firstLine := scanner.Text()
-    return firstLine, nil
-  } else {
-    return "", errors.New("error reading file")
-  }
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	if scanner.Scan() {
+		firstLine := scanner.Text()
+		return firstLine, nil
+	} else {
+		return "", errors.New("error reading file")
+	}
 }
 
 func contains(l string) string {
-  if strings.Contains(l, "bash") {
-    n = "bash"
-  } else if strings.Contains(l, "fish") {
-    n = "fish"
-  } else if strings.Contains(l, "zx") {
-    n = "zx"
-  }
+	if strings.Contains(l, "bash") {
+		n = "bash"
+	} else if strings.Contains(l, "fish") {
+		n = "fish"
+	} else if strings.Contains(l, "python") {
+		n = "python"
+	} else if strings.Contains(l, "zx") {
+		n = "zx"
+	}
 
-  return n
+	return n
 }
 
 func scriptOK(s string) {
-  err := checkFile(args)
-  if err != nil {
-    args = "./"+s+".mjs"
-    err = checkFile(args)
-    if err != nil {
-      args = "./"+s+".js"
-      err = checkFile(args)
-      if err != nil {
-        args = "./"+s+".sh"
-      }
-    }
-  }
+	err := checkFile(args)
+	if err != nil {
+		args = "./" + s + ".mjs"
+		err = checkFile(args)
+		if err != nil {
+			args = "./" + s + ".js"
+			err = checkFile(args)
+			if err != nil {
+				args = "./" + s + ".py"
+				err = checkFile(args)
+				if err != nil {
+					args = "./" + s + ".sh"
+				}
+			}
+		}
+	}
 }
 
 func checkFile(file string) error {
-  _, err := os.Stat(file)
-  if os.IsNotExist(err) {
-    return errors.New(file+" doesn't exist")
-  }
-  
-  return nil
+	_, err := os.Stat(file)
+	if os.IsNotExist(err) {
+		return errors.New(file + " doesn't exist")
+	}
+
+	return nil
 }
