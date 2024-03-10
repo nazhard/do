@@ -20,7 +20,7 @@ func Stuff() (*exec.Cmd, error) {
 	numArgs := len(os.Args)
 
 	if numArgs == 1 {
-		fmt.Println("do v0.0.1 \n")
+		fmt.Println("do v0.0.1")
 		fmt.Println("automaticly run your .sh file on ./scripts/ directory.")
 	}
 
@@ -89,6 +89,8 @@ func contains(l string) string {
 		n = "python"
 	} else if strings.Contains(l, "zx") {
 		n = "zx"
+	} else if strings.Contains(l, "node") {
+		n = "node"
 	}
 
 	return n

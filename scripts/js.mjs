@@ -1,3 +1,3 @@
-#!/usr/bin/env zx
+#!/usr/bin/node
 
-await $`echo "JavaScript with ZX"`
+console.log("Yoo")
