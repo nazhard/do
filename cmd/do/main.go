@@ -1,18 +1,18 @@
 package main
 
 import (
-  "fmt"
+	"fmt"
 
-  "github.com/nazhard/do"
+	"github.com/nazhard/do"
 )
 
 func main() {
-  cmd, err := do.Stuff()
-  if err != nil {
-    fmt.Println(err)
-  }
+	cmd, err := do.RunScript()
+	if err != nil {
+		fmt.Println(err)
+	}
 
-  _ = cmd.Start()
+	_ = cmd.Start()
 
-  defer cmd.Wait()
+	defer cmd.Wait()
 }

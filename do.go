@@ -9,117 +9,99 @@ import (
 	"strings"
 )
 
-var (
-	script string
-	args   string
-	name   string
-	n      string
-)
+const VERSION = "v0.0.1"
 
-func Stuff() (*exec.Cmd, error) {
-	numArgs := len(os.Args)
+func RunScript() (*exec.Cmd, error) {
+	args := os.Args
 
-	if numArgs == 1 {
-		fmt.Println("do v0.0.1")
-		fmt.Println("automaticly run your .sh file on ./scripts/ directory.")
-	}
-
-	if numArgs == 2 {
-		script = os.Args[1]
-
-		args = "./scripts/" + script
-		scriptOK("scripts/" + script)
-
-		meh, err := check(args)
-		if err != nil {
-			fmt.Println(err)
+	switch len(args) {
+	case 1:
+		fmt.Println("do " + VERSION)
+		fmt.Println("Automatically run your .sh file in the ./scripts/ directory.")
+		return nil, nil
+	case 2:
+		return processScript("scripts/" + args[1])
+	case 3:
+		if args[1] == "." {
+			return processScript("scripts/" + args[2])
 		}
-
-		name = contains(meh)
 	}
 
-	if numArgs == 3 && os.Args[1] == "." {
-		script = os.Args[2]
+	return nil, fmt.Errorf("invalid argument")
+}
 
-		args = "./" + script
-		scriptOK(script)
+func processScript(scriptPath string) (*exec.Cmd, error) {
+	scriptPath = resolveScriptPath(scriptPath)
 
-		meh, err := check(args)
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		name = contains(meh)
+	if err := validateFile(scriptPath); err != nil {
+		return nil, err
 	}
 
-	cmd := exec.Command(name, args)
-	// fmt.Println(name, args)
+	interpreter, err := detectInterpreter(scriptPath)
+	if err != nil {
+		return nil, err
+	}
 
+	cmd := exec.Command(interpreter, scriptPath)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
 	return cmd, nil
 }
 
-func check(path string) (string, error) {
-	filePath := path
+func resolveScriptPath(script string) string {
+	exts := []string{"", ".mjs", ".js", ".py", ".sh"}
 
-	file, err := os.Open(filePath)
-	if err != nil {
-		return "", errors.New(path + " doesn't exist")
+	for _, ext := range exts {
+		path := "./" + script + ext
+
+		if fileExists(path) {
+			return path
+		}
 	}
 
+	return script
+}
+
+func detectInterpreter(filePath string) (string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", fmt.Errorf("Failed to open %s: %v", filePath, err)
+	}
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
 	if scanner.Scan() {
 		firstLine := scanner.Text()
-		return firstLine, nil
-	} else {
-		return "", errors.New("error reading file")
+		return getInterpreterFromLine(firstLine), nil
+	}
+
+	return "", errors.New("unable to read script's first line")
+}
+
+func getInterpreterFromLine(line string) string {
+	switch {
+	case strings.Contains(line, "bash"):
+		return "bash"
+	case strings.Contains(line, "fish"):
+		return "fish"
+	case strings.Contains(line, "python"):
+		return "python"
+	case strings.Contains(line, "node"):
+		return "node"
+	default:
+		return ""
 	}
 }
 
-func contains(l string) string {
-	if strings.Contains(l, "bash") {
-		n = "bash"
-	} else if strings.Contains(l, "fish") {
-		n = "fish"
-	} else if strings.Contains(l, "python") {
-		n = "python"
-	} else if strings.Contains(l, "zx") {
-		n = "zx"
-	} else if strings.Contains(l, "node") {
-		n = "node"
-	}
-
-	return n
-}
-
-func scriptOK(s string) {
-	err := checkFile(args)
-	if err != nil {
-		args = "./" + s + ".mjs"
-		err = checkFile(args)
-		if err != nil {
-			args = "./" + s + ".js"
-			err = checkFile(args)
-			if err != nil {
-				args = "./" + s + ".py"
-				err = checkFile(args)
-				if err != nil {
-					args = "./" + s + ".sh"
-				}
-			}
-		}
-	}
-}
-
-func checkFile(file string) error {
+func fileExists(file string) bool {
 	_, err := os.Stat(file)
-	if os.IsNotExist(err) {
-		return errors.New(file + " doesn't exist")
-	}
+	return err == nil
+}
 
+func validateFile(filePath string) error {
+	if !fileExists(filePath) {
+		return fmt.Errorf("file %s doesn't exists", filePath)
+	}
 	return nil
 }
